@@ -1,0 +1,192 @@
+﻿@model List<Product>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="maincontainer left-sidebar">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-8 col-md-9 main-content">
+                <!-- Sortbar -->
+                <div class="sortBar">
+                    <div class="sortBar-left">
+                        <form class="ordering">
+                            <select>
+                                <option value="">SHORT BY</option>
+                                <option value="">Sort by popularity</option>
+                                <option value="">Sort by average rating</option>
+                                <option value="">Sort by price: low to high</option>
+                            </select>
+                            <select>
+                                <option value="">Postion</option>
+                                <option value="">Sort by popularity</option>
+                                <option value="">Sort by average rating</option>
+                                <option value="">Sort by price: low to high</option>
+                            </select>
+                        </form>
+                        <div class="display-product-option">
+                            <a href="#" class="view-as-grid selected"><i class="fa fa-th-large"></i></a>
+                            <a href="#" class="view-as-list"><i class="fa fa-th-list"></i></a>
+                        </div>
+                    </div>
+                    <div class="sortBar-right">
+                        <div class="result-count">
+                            SHOW ITEMS 1 to 12 of 36 total
+                        </div>
+                    </div>
+                </div>
+                <!-- ./ SortBar -->
+                <!-- List products -->
+                <ul class="products row">
+                    @foreach (Product product in Model)
+                    {
+                        <li class="product col-sm-6 col-md-4">
+                            <div class="product-thumb">
+                                <a href="single-product.html">
+                                    <img width="200" height="250"
+                                    src="~/uploads/products/@product.ProductColors.FirstOrDefault()?.ProductImages.FirstOrDefault(x=>x.PosterStatus==true).Image"
+                                    alt="">
+                                </a>
+                                <div class="product-button">
+                                    <a href="#" class="button-compare">Compare</a>
+                                    <a href="#" class="button-wishlist">Wishlist</a>
+                                    <a href="#" class="button-quickview">Quick view</a>
+                                </div>
+                            </div>
+                            <div class="product-info">
+                                <h3><a href="#">@product.Name</a></h3>
+                                <span
+                                class="product-price">$@(product.DiscountPrice!=0?product.SalePrice-product.DiscountPrice:product.SalePrice)</span>
+                                <a asp-controller="product" asp-action="addtocart" asp-route-id="@product.Id"
+                                class="button-add-to-cart">ADD TO CART</a>
+                            </div>
+                        </li>
+                    }
+                </ul>
+                <nav class="pagination">
+                    <ul>
+                        @if (ViewBag.Page != 1)
+                        {
+                            <li><a asp-all-route-data="@ViewBag.Filters" asp-route-page="@(ViewBag.Page-1)">Prev</a></li>
+                        }
+                        @if (ViewBag.Count > 6)
+                        {
+                            @for (int i = 1; i <= Math.Ceiling((decimal)ViewBag.Count / 6); i++)
+                            {
+                                if (ViewBag.Page == i)
+                                {
+                                    <li class="active"><a asp-all-route-data="@ViewBag.Filters" asp-route-page="@i">@i</a></li>
+
+                                }
+                                else
+                                {
+                                    <li><a asp-all-route-data="@ViewBag.Filters" asp-route-page="@i">@i</a></li>
+                                }
+
+                            }
+                        }
+                        @if (ViewBag.Page != Math.Ceiling((decimal)ViewBag.Count / 6))
+                        {
+                            <li><a asp-all-route-data="@ViewBag.Filters" asp-route-page="@(ViewBag.Page+1)">Next</a></li>
+                        }
+                    </ul>
+                </nav>
+                <!-- ./ List Products -->
+            </div>
+            <!-- Sliderbar -->
+            <form>
+                <div class="col-sm-4 col-md-3 sidebar">
+                    <!-- Product category -->
+                    <div class="widget widget_product_categories">
+                        <h2 class="widget-title">By Categories</h2>
+                        <ul class="product-categories">
+                            @foreach (Category item in ViewBag.Categories)
+                            {
+                                string name = String.Format("filters[{0}-{1}]", item.Id, 1);
+                                if (ViewBag.Filters != null)
+                                {
+                                    if (ViewBag.Filters.ContainsKey($"{item.Id}-1"))
+                                    {
+                                        <li><input type="checkbox" name="@name" checked value="@item.Name" />@item.Name</li>
+                                    }
+                                    else
+                                    {
+                                        <li><input type="checkbox" name="@name" value="@item.Name" />@item.Name</li>
+                                    }
+                                }
+                            }
+                        </ul>
+                    </div>
+                    <!-- ./Product category -->
+                    <!-- Filter color -->
+                    <div class="widget widget_layered_nav">
+                        <h2 class="widget-title">BY COLORS</h2>
+                        <ul>
+                            @foreach (Color item in ViewBag.Colors)
+                            {
+                                string name = String.Format("filters[{0}-{1}]", item.Id, 2);
+                                if (ViewBag.Filters != null)
+                                {
+                                    if (ViewBag.Filters.ContainsKey($"{item.Id}-2"))
+                                    {
+                                        <li><input type="checkbox" name="@name" checked value="@item.Name" />@item.Name</li>
+                                    }
+                                    else
+                                    {
+                                        <li><input type="checkbox" name="@name" value="@item.Name" />@item.Name</li>
+                                    }
+                                }
+                            }
+
+                        </ul>
+                    </div>
+                    <!-- ./Filter color -->
+                    <!-- Filter price -->
+                    <div class="widget widget_price_filter">
+                        <h2 class="widget-title">BY PRICES</h2>
+                        <div class="price_slider_wrapper">
+                            <div class="amount-range-price">$@ViewBag.Min - $@ViewBag.Max</div>
+                            <div data-label-reasult="" data-min="0" data-max="@(ViewBag.Max+50)" data-unit="$"
+                                class="slider-range-price" data-value-min="@ViewBag.Min" data-value-max="@ViewBag.Max">
+                            </div>
+                            <input type="hidden" name="filters[min]" class="min" value="@ViewBag.Min" />
+                            <input type="hidden" name="filters[max]" class="max" value="@ViewBag.Max" />
+                            <button class="button" type="submit">Filter</button>
+                        </div>
+                    </div>
+                    <!-- ./Filter price -->
+                    <!-- Compare products -->
+                    <div class="widget yith-woocompare-widget">
+                        <h2 class="widget-title">COMPARE PRODUCTS</h2>
+                        <div class="no-product">
+                            NO PRODUCTS HAVE COMPARE
+                        </div>
+                    </div>
+                    <!-- ./Compare products -->
+                    <!-- Product tags -->
+                    <div class="widget widget_product_tag_cloud">
+                        <h2 class="widget-title">POPULAR TAGS</h2>
+                        <div class="tagcloud">
+                            <a href="#">Cotton</a>
+                            <a href="#">Leggings</a>
+                            <a href="#">Men</a>
+                            <a href="#">Shirt</a>
+                            <a href="#">T-shirt</a>
+                            <a href="#">COSMETIC</a>
+                            <a href="#">SOFT WEAR</a>
+                            <a href="#">ACCESSORIES</a>
+                            <a href="#">LIFE STYLE</a>
+                        </div>
+                    </div>
+                    <!-- ./Product tags -->
+                    <!-- Product tags -->
+                    <div class="widget widget_custom_image">
+                        <a href="#"><img src="~/images/b/b9.jpg" alt="" /></a>
+                    </div>
+                    <!-- ./Product tags -->
+                </div>
+            </form>
+            <!-- ./Sidebar -->
+        </div>
+    </div>
+</div>
